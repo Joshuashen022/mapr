@@ -29,5 +29,5 @@ version = "0.3"
 features = ["basetsd", "handleapi", "memoryapi", "minwindef", "std", "sysinfoapi"]
 
 [dependencies]
-allocator-suite = {path = "../allocator-suite"}
+allocator-suite = {git = "https://github.com/Joshuashen022/allocator-suite"}
 log = "0.4.7"
