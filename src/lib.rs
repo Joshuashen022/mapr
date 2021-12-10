@@ -569,7 +569,13 @@ impl MmapMut {
     /// Creates a even-sized writeable anonymous memory map.
     /// Set `huge_page` to set if use huge_page setting
     /// 
+    /// # Example
+    ///
     /// ```
+    /// use std::fs::OpenOptions;
+    /// use std::path::PathBuf;
+    ///
+    /// use mapr::MmapMut;
     /// let size = 32;          // Memory size
     /// 
     /// let use_huge = false;   // Not using huge page
@@ -600,7 +606,13 @@ impl MmapMut {
     /// Pass `node` to set numa node preference.
     /// Useful for large memory useage.
     /// 
+    /// # Example
+    ///
     /// ```
+    /// use std::fs::OpenOptions;
+    /// use std::path::PathBuf;
+    ///
+    /// use mapr::MmapMut;
     /// let size = 1 << 30;     // Memory size
     /// 
     /// let use_huge = true;   // Use huge page
@@ -625,7 +637,7 @@ impl MmapMut {
     }
 
 
-    pub unsafe fn cretae(file: &File) -> Result<MmapMut> {
+    pub unsafe fn create(file: &File) -> Result<MmapMut> {
         MmapOptions::new().map_mut(file)
     }
     /// Creates an anonymous memory map.
