@@ -12,7 +12,6 @@ mod unix;
 #[cfg(unix)]
 use unix::MmapInner;
 
-use allocator_suite::*;
 use std::fmt;
 use std::fs::File;
 use std::io::{Error, ErrorKind, Result};
@@ -566,6 +565,19 @@ impl MmapMut {
         MmapOptions::new().map_mut(file)
     }
 
+    /// 
+    /// Creates a even-sized writeable anonymous memory map.
+    /// Set `huge_page` to set if use huge_page setting
+    /// 
+    /// ```
+    /// let size = 32;          // Memory size
+    /// 
+    /// let use_huge = false;   // Not using huge page
+    /// 
+    /// let mut mmap: MmapMut = unsafe { MmapMut::create_mmp(size, use_huge).unwrap()};
+    /// 
+    /// mmap.copy_from_slice(b"Hello, world!");
+    /// ```
     pub unsafe fn create_mmp(mem_size: usize, huge_page: bool) -> Result<MmapMut> {
         use allocator_suite::simple_use::*;
         use libc::c_void;
@@ -581,6 +593,37 @@ impl MmapMut {
 
         MmapInner::new_from_c_void(a_void, mem_size as usize).map(|inner| MmapMut { inner })
     }
+
+    /// 
+    /// Creates a even-sized writeable anonymous memory map.
+    /// Set `huge_page` to set if use huge_page setting.
+    /// Pass `node` to set numa node preference.
+    /// Useful for large memory useage.
+    /// 
+    /// ```
+    /// let size = 1 << 30;     // Memory size
+    /// 
+    /// let use_huge = true;   // Use huge page
+    /// 
+    /// let mut mmap: MmapMut = unsafe { MmapMut::create_mmap_bind(size, use_huge, 0).unwrap()};
+    /// 
+    /// ```
+    pub unsafe fn create_mmap_bind(mem_size: usize, huge_page: bool, node: u8) -> Result<MmapMut> {
+        use allocator_suite::simple_use::*;
+        use libc::c_void;
+        use log::trace;
+
+        let ptr_u8: *mut u8 =
+            simple_alloicate_memory_address(mem_size, huge_page, Some(node)).unwrap() as *mut u8;
+
+        trace!("{} sized memory allocated at {:?}", mem_size, ptr_u8);
+
+        let (a, _) = ptr_u8.to_raw_parts(); // *mut u8 => *mut ()
+        let a_void = a as *mut c_void; // *mut () => c_void (*mut ?)
+
+        MmapInner::new_from_c_void(a_void, mem_size as usize).map(|inner| MmapMut { inner })
+    }
+
 
     pub unsafe fn cretae(file: &File) -> Result<MmapMut> {
         MmapOptions::new().map_mut(file)
